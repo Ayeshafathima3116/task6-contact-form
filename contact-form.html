@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact Form — Task 6</title>
+  <style>
+    body{ font-family: Arial, sans-serif; background:#f2f6f9; padding:30px; }
+    .card{ background:#fff; max-width:600px; margin:0 auto; padding:20px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+    label{ display:block; margin:12px 0 6px; }
+    input, textarea{ width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; }
+    .error{ color:#b91c1c; font-size:0.9rem; margin-top:6px; display:none; }
+    .error.show{ display:block; }
+    .row{ display:flex; gap:10px; align-items:center; margin-top:14px; }
+    button{ padding:10px 14px; border-radius:8px; border:0; cursor:pointer; }
+    .btn-primary{ background:#0ea5a4; color:#fff; }
+    .btn-secondary{ background:#eef2f7; }
+    .feedback{ padding:10px; border-radius:8px; margin-bottom:12px; display:none; }
+    .feedback.success{ background:#ecfdf5; color:#065f46; display:block; }
+    .feedback.fail{ background:#fff1f2; color:#7f1d1d; display:block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Contact Us</h2>
+    <div id="feedbackArea" aria-live="polite"></div>
+    <form id="contactForm" novalidate>
+      <label for="name">Name *</label>
+      <input id="name" name="name" type="text" />
+      <div id="nameError" class="error"></div>
+
+      <label for="email">Email *</label>
+      <input id="email" name="email" type="email" />
+      <div id="emailError" class="error"></div>
+
+      <label for="message">Message *</label>
+      <textarea id="message" name="message"></textarea>
+      <div id="messageError" class="error"></div>
+
+      <div class="row">
+        <button class="btn-primary" type="submit">Send Message</button>
+        <button class="btn-secondary" type="button" id="resetBtn">Reset</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Short, clear validation script
+    const form = document.getElementById('contactForm');
+    const nameEl = document.getElementById('name');
+    const emailEl = document.getElementById('email');
+    const messageEl = document.getElementById('message');
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const messageError = document.getElementById('messageError');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    function showError(el, msg){ el.textContent = msg; el.classList.add('show'); }
+    function hideError(el){ el.textContent = ''; el.classList.remove('show'); }
+
+    function validateName(){
+      const v = nameEl.value.trim();
+      if (!v) { showError(nameError, 'Name is required.'); return false; }
+      if (v.length < 2) { showError(nameError, 'Enter at least 2 characters.'); return false; }
+      hideError(nameError); return true;
+    }
+    function validateEmail(){
+      const v = emailEl.value.trim();
+      if (!v) { showError(emailError, 'Email is required.'); return false; }
+      if (!emailRegex.test(v)) { showError(emailError, 'Enter a valid email.'); return false; }
+      hideError(emailError); return true;
+    }
+    function validateMessage(){
+      const v = messageEl.value.trim();
+      if (!v) { showError(messageError, 'Message cannot be empty.'); return false; }
+      if (v.length < 6) { showError(messageError, 'Message too short.'); return false; }
+      hideError(messageError); return true;
+    }
+
+    // Live feedback while typing
+    nameEl.addEventListener('input', validateName);
+    emailEl.addEventListener('input', validateEmail);
+    messageEl.addEventListener('input', validateMessage);
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault(); // stop actual submission
+      feedbackArea.innerHTML = '';
+      const ok1 = validateName();
+      const ok2 = validateEmail();
+      const ok3 = validateMessage();
+      if (ok1 && ok2 && ok3){
+        feedbackArea.innerHTML = '<div class="feedback success">✅ Valid — (demo only, not sent).</div>';
+        form.reset();
+        nameEl.focus();
+      } else {
+        feedbackArea.innerHTML = '<div class="feedback fail">❌ Please fix errors below.</div>';
+        // focus first invalid
+        if (!ok1) nameEl.focus();
+        else if (!ok2) emailEl.focus();
+        else messageEl.focus();
+      }
+    });
+
+    resetBtn.addEventListener('click', function(){ form.reset(); hideError(nameError); hideError(emailError); hideError(messageError); feedbackArea.innerHTML=''; nameEl.focus(); });
+  </script>
+</body>
+</html>
